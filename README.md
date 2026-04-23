@@ -177,7 +177,7 @@ taskflow/
 - **Responsive layout:** Sütunlar yatay scroll ile kaydırılır
 - **Auto-scroll:** Kart kenar yakınına getirildiğinde otomatik kaydırma
 
-## Özellikler 
+## Hedefler 
 
 Bu projede öncelik, çekirdek Kanban akışını güvenilir ve tutarlı şekilde sunmaktı.
 
