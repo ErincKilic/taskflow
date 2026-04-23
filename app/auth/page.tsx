@@ -79,7 +79,7 @@ export default function AuthPage() {
             </span>
           </div>
           <p className="text-slate-400 text-sm">
-            Kanban proje yönetim tahtası
+            Görevlerini sürükle,bırak,bitir.
           </p>
         </div>
 
