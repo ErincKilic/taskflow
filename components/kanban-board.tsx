@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { GripVertical, Plus, X, Trash2, ArrowLeft, Columns3 } from "lucide-react";
+import { GripVertical, Plus, X, Trash2, ArrowLeft, Columns3, Calendar } from "lucide-react";
 import { calcPosition, POS_GAP } from "@/lib/utils";
 import { createColumn, updateColumn, deleteColumn as deleteColumnAction } from "@/actions/columns";
 import { createCard as createCardAction, updateCard as updateCardAction, moveCard, deleteCard as deleteCardAction } from "@/actions/cards";
@@ -89,6 +89,18 @@ function KanbanCard({
             <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">
               {card.description}
             </p>
+          )}
+          {card.due_date && (
+            <div className={`inline-flex items-center gap-1 mt-1.5 px-1.5 py-0.5 rounded text-[10px] font-medium ${
+              new Date(card.due_date) < new Date(new Date().toDateString())
+                ? "bg-red-50 text-red-600"
+                : new Date(card.due_date) <= new Date(Date.now() + 2 * 86400000)
+                ? "bg-amber-50 text-amber-600"
+                : "bg-slate-100 text-slate-500"
+            }`}>
+              <Calendar size={10} />
+              {new Date(card.due_date).toLocaleDateString("tr-TR", { day: "numeric", month: "short" })}
+            </div>
           )}
         </div>
       </div>
@@ -363,6 +375,7 @@ export default function KanbanBoard({
       title,
       description: "",
       position,
+      due_date: null,
       created_at: new Date().toISOString(),
     };
     setCards((prev) => [...prev, tempCard]);
@@ -406,6 +419,7 @@ export default function KanbanBoard({
       description: finalCard.description,
       column_id: finalCard.column_id,
       position: finalCard.position,
+      due_date: finalCard.due_date,
     });
   };
 

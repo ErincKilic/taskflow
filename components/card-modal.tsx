@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Trash2 } from "lucide-react";
+import { X, Trash2, Calendar } from "lucide-react";
 import type { Card, Column } from "@/types/database";
 
 interface Props {
@@ -22,6 +22,7 @@ export default function CardModal({
   const [title, setTitle] = useState(card.title);
   const [desc, setDesc] = useState(card.description || "");
   const [colId, setColId] = useState(card.column_id);
+  const [dueDate, setDueDate] = useState(card.due_date || "");
 
   const handleSave = () => {
     if (!title.trim()) return;
@@ -30,6 +31,7 @@ export default function CardModal({
       title: title.trim(),
       description: desc.trim(),
       column_id: colId,
+      due_date: dueDate || null,
     });
   };
 
@@ -78,21 +80,44 @@ export default function CardModal({
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
-              Sütun
-            </label>
-            <select
-              value={colId}
-              onChange={(e) => setColId(e.target.value)}
-              className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition"
-            >
-              {columns.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.title}
-                </option>
-              ))}
-            </select>
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                Sütun
+              </label>
+              <select
+                value={colId}
+                onChange={(e) => setColId(e.target.value)}
+                className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition"
+              >
+                {columns.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                Teslim Tarihi
+              </label>
+              <div className="relative">
+                <input
+                  type="date"
+                  value={dueDate}
+                  onChange={(e) => setDueDate(e.target.value)}
+                  className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition"
+                />
+                {dueDate && (
+                  <button
+                    onClick={() => setDueDate("")}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600 rounded"
+                  >
+                    <X size={12} />
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="flex items-center justify-between pt-2">

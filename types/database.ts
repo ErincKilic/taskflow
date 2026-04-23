@@ -19,6 +19,7 @@ export interface Card {
   title: string;
   description: string;
   position: number;
+  due_date: string | null;
   created_at: string;
 }
 

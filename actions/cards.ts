@@ -24,6 +24,7 @@ export async function updateCard(
     description?: string;
     column_id?: string;
     position?: number;
+    due_date?: string | null;
   }
 ) {
   const supabase = await createClient();
