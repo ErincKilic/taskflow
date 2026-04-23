@@ -90,6 +90,26 @@ function KanbanCard({
               {card.description}
             </p>
           )}
+          {card.label && (() => {
+            const colors: Record<string, string> = {
+              red: "#ef4444", orange: "#f97316", yellow: "#eab308",
+              green: "#22c55e", blue: "#3b82f6", purple: "#a855f7",
+            };
+            const names: Record<string, string> = {
+              red: "Acil", orange: "Önemli", yellow: "Orta",
+              green: "Düşük", blue: "Bilgi", purple: "Fikir",
+            };
+            const c = colors[card.label] || "#94a3b8";
+            return (
+              <div
+                className="inline-flex items-center gap-1 mt-1.5 mr-1 px-1.5 py-0.5 rounded text-[10px] font-medium"
+                style={{ backgroundColor: c + "15", color: c }}
+              >
+                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c }} />
+                {names[card.label] || card.label}
+              </div>
+            );
+          })()}
           {card.due_date && (
             <div className={`inline-flex items-center gap-1 mt-1.5 px-1.5 py-0.5 rounded text-[10px] font-medium ${
               new Date(card.due_date) < new Date(new Date().toDateString())
@@ -376,6 +396,7 @@ export default function KanbanBoard({
       description: "",
       position,
       due_date: null,
+      label: null,
       created_at: new Date().toISOString(),
     };
     setCards((prev) => [...prev, tempCard]);
@@ -420,6 +441,7 @@ export default function KanbanBoard({
       column_id: finalCard.column_id,
       position: finalCard.position,
       due_date: finalCard.due_date,
+      label: finalCard.label,
     });
   };
 

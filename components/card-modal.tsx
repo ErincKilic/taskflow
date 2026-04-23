@@ -4,6 +4,15 @@ import { useState } from "react";
 import { X, Trash2, Calendar } from "lucide-react";
 import type { Card, Column } from "@/types/database";
 
+const LABELS = [
+  { value: "red", color: "#ef4444", name: "Acil" },
+  { value: "orange", color: "#f97316", name: "Önemli" },
+  { value: "yellow", color: "#eab308", name: "Orta" },
+  { value: "green", color: "#22c55e", name: "Düşük" },
+  { value: "blue", color: "#3b82f6", name: "Bilgi" },
+  { value: "purple", color: "#a855f7", name: "Fikir" },
+];
+
 interface Props {
   card: Card;
   columns: Column[];
@@ -23,6 +32,7 @@ export default function CardModal({
   const [desc, setDesc] = useState(card.description || "");
   const [colId, setColId] = useState(card.column_id);
   const [dueDate, setDueDate] = useState(card.due_date || "");
+  const [label, setLabel] = useState(card.label || "");
 
   const handleSave = () => {
     if (!title.trim()) return;
@@ -32,6 +42,7 @@ export default function CardModal({
       description: desc.trim(),
       column_id: colId,
       due_date: dueDate || null,
+      label: label || null,
     });
   };
 
@@ -78,6 +89,36 @@ export default function CardModal({
               placeholder="Detay ekle..."
               className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition resize-none"
             />
+          </div>
+
+          {/* Labels */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+              Etiket
+            </label>
+            <div className="flex flex-wrap gap-1.5">
+              {LABELS.map((l) => (
+                <button
+                  key={l.value}
+                  onClick={() => setLabel(label === l.value ? "" : l.value)}
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all border ${
+                    label === l.value
+                      ? "border-slate-300 shadow-sm scale-105"
+                      : "border-transparent hover:border-slate-200"
+                  }`}
+                  style={{
+                    backgroundColor: label === l.value ? l.color + "20" : l.color + "10",
+                    color: l.color,
+                  }}
+                >
+                  <div
+                    className="w-2.5 h-2.5 rounded-full"
+                    style={{ backgroundColor: l.color }}
+                  />
+                  {l.name}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="flex gap-3">

@@ -20,6 +20,7 @@ export interface Card {
   description: string;
   position: number;
   due_date: string | null;
+  label: string | null;
   created_at: string;
 }
 
