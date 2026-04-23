@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { GripVertical, Plus, X, Trash2, ArrowLeft, Columns3, Calendar } from "lucide-react";
+import { GripVertical, Plus, X, Trash2, ArrowLeft, Columns3, Calendar, Search, AlertTriangle } from "lucide-react";
 import { calcPosition, POS_GAP } from "@/lib/utils";
 import { createColumn, updateColumn, deleteColumn as deleteColumnAction } from "@/actions/columns";
 import { createCard as createCardAction, updateCard as updateCardAction, moveCard, deleteCard as deleteCardAction } from "@/actions/cards";
@@ -32,6 +32,57 @@ interface DragRef {
   offsetY: number;
   activated: boolean;
   activationTimer: ReturnType<typeof setTimeout> | null;
+}
+
+function ConfirmDialog({
+  title,
+  message,
+  onConfirm,
+  onCancel,
+}: {
+  title: string;
+  message: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      onClick={onCancel}
+    >
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+      <div
+        className="ani-scale relative bg-white rounded-2xl shadow-2xl w-full max-w-sm"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="p-5 space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center shrink-0">
+              <AlertTriangle size={20} className="text-red-500" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-800">{title}</h3>
+              <p className="text-xs text-slate-500 mt-0.5">{message}</p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={onCancel}
+              className="px-4 py-2 text-xs font-medium text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition"
+            >
+              İptal
+            </button>
+            <button
+              onClick={onConfirm}
+              className="px-4 py-2 text-xs font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 transition"
+            >
+              Sil
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 const COL_PALETTE = [
@@ -347,7 +398,12 @@ export default function KanbanBoard({
   const [editingCard, setEditingCard] = useState<Card | null>(null);
   const [addingCol, setAddingCol] = useState(false);
   const [newColTitle, setNewColTitle] = useState("");
-
+  const [searchQuery, setSearchQuery] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState<{
+    type: "column" | "board";
+    id: string;
+    title: string;
+  } | null>(null);
   // DnD
   const [dragOverlay, setDragOverlay] = useState<DragOverlayState | null>(null);
   const [dropIndicator, setDropIndicator] = useState<DropIndicatorState | null>(null);
@@ -485,7 +541,17 @@ export default function KanbanBoard({
     }
   };
 
-  const handleDeleteColumn = async (id: string) => {
+  const handleDeleteColumn = (id: string) => {
+    const col = columns.find((c) => c.id === id);
+    const cardCount = cards.filter((c) => c.column_id === id).length;
+    setConfirmDelete({
+      type: "column",
+      id,
+      title: `"${col?.title}" sütununu${cardCount > 0 ? ` ve içindeki ${cardCount} kartı` : ""} silmek istediğinize emin misiniz?`,
+    });
+  };
+
+  const executeDeleteColumn = async (id: string) => {
     setColumns((prev) => prev.filter((c) => c.id !== id));
     setCards((prev) => prev.filter((c) => c.column_id !== id));
     await deleteColumnAction(id);
@@ -716,6 +782,23 @@ export default function KanbanBoard({
           </div>
         </div>
         <div className="flex-1" />
+        <div className="relative hidden sm:block">
+          <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Kart ara..."
+            className="w-40 pl-8 pr-3 py-1.5 text-xs border border-slate-200 rounded-lg bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 focus:bg-white transition"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+            >
+              <X size={12} />
+            </button>
+          )}
+        </div>
         <button
           onClick={() => setAddingCol(true)}
           className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-indigo-700 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition"
@@ -739,7 +822,15 @@ export default function KanbanBoard({
               key={col.id}
               column={col}
               colorIndex={index}
-              cards={cards.filter((c) => c.column_id === col.id)}
+              cards={cards.filter((c) => {
+                if (c.column_id !== col.id) return false;
+                if (!searchQuery) return true;
+                const q = searchQuery.toLowerCase();
+                return (
+                  c.title.toLowerCase().includes(q) ||
+                  c.description?.toLowerCase().includes(q)
+                );
+              })}
               onAddCard={handleAddCard}
               onEditCard={setEditingCard}
               onDeleteColumn={handleDeleteColumn}
@@ -830,6 +921,22 @@ export default function KanbanBoard({
           onClose={() => setEditingCard(null)}
         />
       )}
+
+      {/* Confirm dialog */}
+      {confirmDelete && (
+        <ConfirmDialog
+          title="Silme Onayı"
+          message={confirmDelete.title}
+          onConfirm={() => {
+            if (confirmDelete.type === "column") {
+              executeDeleteColumn(confirmDelete.id);
+            }
+            setConfirmDelete(null);
+          }}
+          onCancel={() => setConfirmDelete(null)}
+        />
+      )}
+      
     </div>
   );
 }
