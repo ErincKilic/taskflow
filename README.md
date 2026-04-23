@@ -139,7 +139,7 @@ taskflow/
 - **Responsive:** Sütunlar yatay scroll ile kaydırılır
 - **Auto-scroll:** Kart kenar yakınına getirildiğinde otomatik kaydırma
 
-## Gelecek Geliştirmeler (zaman kalırsa)
+## Gelecek Geliştirmeler
 
 - [ ] Kartlara due date alanı (DatePicker + görsel rozet)
 - [ ] Renk etiketleri (basit enum: red, blue, green...)
