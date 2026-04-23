@@ -146,6 +146,7 @@ function KanbanColumn({
   onCardPointerDown,
   dropIndicator,
   isDragOver,
+  colorIndex,
 }: {
   column: Column;
   cards: Card[];
