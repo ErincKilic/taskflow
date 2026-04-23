@@ -34,11 +34,14 @@ interface DragRef {
   activationTimer: ReturnType<typeof setTimeout> | null;
 }
 
-const COL_COLORS: Record<string, string> = {
-  "Yapılacak": "#6366f1",
-  "Devam Ediyor": "#f59e0b",
-  "Tamamlandı": "#10b981",
-};
+const COL_PALETTE = [
+  "#6366f1", "#f59e0b", "#10b981", "#ec4899", "#06b6d4",
+  "#f43f5e", "#8b5cf6", "#14b8a6", "#f97316", "#3b82f6",
+];
+
+function getColColor(index: number): string {
+  return COL_PALETTE[index % COL_PALETTE.length];
+}
 
 /* ═══════════════════════════════════════════
    KANBAN CARD
@@ -155,6 +158,7 @@ function KanbanColumn({
   onCardPointerDown: (e: React.PointerEvent, card: Card) => void;
   dropIndicator: DropIndicatorState | null;
   isDragOver: boolean;
+  colorIndex: number;
 }) {
   const [adding, setAdding] = useState(false);
   const [newTitle, setNewTitle] = useState("");
@@ -187,7 +191,7 @@ function KanbanColumn({
     [cards]
   );
 
-  const dotColor = COL_COLORS[column.title] || "#94a3b8";
+  const dotColor = getColColor(colorIndex);
 
   return (
     <div
@@ -729,10 +733,11 @@ export default function KanbanBoard({
           className="flex gap-4 h-full items-start"
           style={{ minHeight: "calc(100vh - 140px)" }}
         >
-          {sortedColumns.map((col) => (
+          {sortedColumns.map((col,index) => (
             <KanbanColumn
               key={col.id}
               column={col}
+              colorIndex={index}
               cards={cards.filter((c) => c.column_id === col.id)}
               onAddCard={handleAddCard}
               onEditCard={setEditingCard}
